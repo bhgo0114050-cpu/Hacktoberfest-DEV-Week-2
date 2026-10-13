@@ -1,0 +1,730 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080d1d">
+<title>AstroBuddy — Night Sky Companion</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:#080d1d;
+  --panel:#111a30;
+  --panel2:#17213d;
+  --text:#f5f6ff;
+  --muted:#9ba8c7;
+  --purple:#b5a7ff;
+  --cyan:#7ce5f4;
+  --border:rgba(169,185,255,.15);
+}
+* {box-sizing:border-box}
+html {scroll-behavior:smooth;scroll-padding-top:85px}
+body {
+  margin:0;background:
+  radial-gradient(ellipse at 80% 0%,#202653,transparent 35%),
+  var(--bg);color:var(--text);
+  font-family:"DM Sans",sans-serif;line-height:1.6;
+}
+button,input,select {font:inherit}
+button,a { -webkit-tap-highlight-color:transparent }
+a {color:inherit;text-decoration:none}
+button {cursor:pointer}
+.starfield {
+  position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.4;
+  background-image:
+  radial-gradient(2px 2px at 15% 20%,white,transparent),
+  radial-gradient(1px 1px at 80% 35%,#b9b0ff,transparent),
+  radial-gradient(2px 2px at 40% 70%,white,transparent),
+  radial-gradient(1px 1px at 70% 85%,white,transparent);
+  background-size:230px 220px,300px 270px,400px 350px,250px 300px;
+}
+.wrap {width:min(1120px,calc(100% - 40px));margin:auto}
+.topbar {
+  height:76px;display:flex;align-items:center;justify-content:space-between;
+  gap:22px;width:min(1200px,calc(100% - 40px));margin:auto;
+  border-bottom:1px solid var(--border)
+}
+.brand {font:700 22px "Space Grotesk";white-space:nowrap}
+.brand span {color:var(--purple)}
+.brand-mark {
+  display:inline-grid;place-items:center;width:32px;height:32px;
+  border-radius:10px;color:#10152b;margin-right:7px;
+  background:linear-gradient(135deg,var(--purple),var(--cyan))
+}
+.nav {display:flex;gap:24px;font-size:12px;color:#c1c9e1}
+.nav a:hover {color:var(--cyan)}
+.cta,.btn {
+  display:inline-flex;align-items:center;justify-content:center;gap:12px;
+  border-radius:9px;padding:12px 16px;font-weight:700;font-size:12px
+}
+.cta {border:1px solid #535782}
+.btn-primary {
+  background:linear-gradient(110deg,var(--purple),var(--cyan));
+  color:#11162b;border:0
+}
+.btn-quiet {border:1px solid var(--border);background:#ffffff05}
+.btn:hover {filter:brightness(1.1);transform:translateY(-1px)}
+.menu {display:none;background:none;color:white;border:0;font-size:24px}
+.hero {
+  min-height:480px;display:grid;grid-template-columns:1fr 1fr;
+  align-items:center;gap:35px;padding-top:35px;padding-bottom:30px
+}
+.eyebrow {font-size:10px;letter-spacing:2px;color:var(--purple);font-weight:700}
+.hero h1 {
+  font:600 clamp(38px,5vw,60px)/1.1 "Space Grotesk";
+  letter-spacing:-2.5px;margin:20px 0
+}
+.gradient {
+  background:linear-gradient(90deg,var(--purple),var(--cyan));
+  color:transparent;background-clip:text
+}
+.hero p,.intro p {color:var(--muted);font-size:14px;line-height:1.9}
+.actions {display:flex;gap:10px;flex-wrap:wrap;margin-top:25px}
+.hero-note {font-size:11px;color:#8996b7;margin-top:25px}
+.hero-art {
+  height:350px;display:grid;place-items:center;position:relative;
+  isolation:isolate
+}
+.hero-art:before {
+  content:"";position:absolute;width:230px;height:230px;border-radius:50%;
+  background:#7668ef40;filter:blur(50px)
+}
+.orbit {
+  position:absolute;width:330px;height:160px;border:1px solid #aab0ff35;
+  border-radius:50%;transform:rotate(-25deg)
+}
+.orbit.two {transform:rotate(50deg);width:350px;height:230px}
+.planet {
+  width:175px;height:175px;border-radius:50%;position:relative;
+  background:radial-gradient(circle at 30% 25%,#fff0cf,#c78bf1 28%,#665fd1 65%,#18234f);
+  box-shadow:inset -20px -20px 40px #080d1d,0 0 50px #9e91ff50
+}
+.ring {
+  position:absolute;width:245px;height:65px;border:11px solid #c3b2f2;
+  border-left-color:#776cb5;border-radius:50%;left:-35px;top:55px;
+  transform:rotate(-22deg)
+}
+.art-moon {position:absolute;right:15%;top:20%;font-size:28px;color:var(--cyan)}
+.art-star {position:absolute;left:15%;top:25%;color:#ddd5ff;font-size:25px}
+.art-label {
+  position:absolute;background:#111a31e8;border:1px solid var(--border);
+  padding:9px 12px;border-radius:9px;font-size:10px
+}
+.label-one {left:0;top:13%}
+.label-two {right:0;bottom:13%;color:var(--purple)}
+.stats {
+  display:grid;grid-template-columns:repeat(3,1fr);
+  padding:20px;border:1px solid var(--border);border-radius:14px;
+  background:#ffffff04
+}
+.stat {padding:5px 18px;border-right:1px solid var(--border)}
+.stat:last-child {border:0}
+.stat strong,.stat small {display:block}
+.stat strong {font:600 14px "Space Grotesk"}
+.stat small {color:var(--muted);font-size:10px;margin-top:4px}
+.section {padding-top:85px}
+.section-heading {
+  display:flex;align-items:end;justify-content:space-between;
+  gap:20px;margin-bottom:25px
+}
+h2 {font:600 clamp(27px,3.5vw,38px)/1.2 "Space Grotesk";margin:8px 0}
+.section-heading h2 span {color:var(--purple)}
+.date-pill {
+  border:1px solid var(--border);border-radius:25px;padding:8px 12px;
+  color:var(--muted);font-size:10px
+}
+.grid {display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.card {
+  border:1px solid var(--border);border-radius:14px;padding:22px;
+  background:linear-gradient(140deg,#151e38,#0d1428);overflow:hidden
+}
+.card-kicker {font-size:9px;letter-spacing:1.4px;color:#a5b0d0}
+.card h3 {font:600 19px "Space Grotesk";margin:9px 0}
+.card p {font-size:12px;color:var(--muted);line-height:1.8}
+.moon-symbol {font-size:52px;color:var(--purple);line-height:1.4}
+.text-btn {border:0;background:none;color:var(--purple);padding:0;font-weight:700;font-size:11px}
+.text-btn:hover {color:var(--cyan)}
+.tip {font-size:11px!important;color:#a8eee9!important}
+.object-card {padding:0;display:grid;grid-template-columns:40% 60%;min-height:195px}
+.object-art {display:grid;place-items:center;background:#20254a;font-size:65px}
+.object-info {padding:18px 15px}
+.object-info h3 {margin:4px 0}
+.object-info p {margin:4px 0}
+.search {
+  background:#10182d;border:1px solid var(--border);border-radius:9px;
+  color:white;padding:11px 13px;outline:none;width:230px;font-size:11px
+}
+.explore-grid {display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.tile {
+  border:1px solid var(--border);border-radius:14px;padding:15px;
+  background:linear-gradient(145deg,#262449,#11172d);
+  text-align:left;color:white;min-width:0;transition:.2s
+}
+.tile:hover {transform:translateY(-4px);border-color:var(--purple)}
+.tile-art {
+  height:105px;display:grid;place-items:center;font-size:65px;
+  text-shadow:0 0 28px #b8aaff60
+}
+.tile small {display:block;color:#9da9ca;font-size:8px;letter-spacing:1px}
+.tile strong {display:block;font:600 18px "Space Grotesk";margin-top:4px}
+.tile em {font-style:normal;font-size:10px;color:var(--muted)}
+.hidden {display:none!important}
+.planner-section {
+  margin-top:85px;padding:65px 0;
+  background:radial-gradient(ellipse at 15% 50%,#2b285b80,transparent 50%),#0e152b;
+  border-block:1px solid var(--border)
+}
+.planner-layout {display:grid;grid-template-columns:1fr .85fr;gap:55px;align-items:center}
+.planner-copy p {font-size:13px;line-height:1.9;color:var(--muted);max-width:390px}
+.planner-form {padding:24px;background:#111a30;border:1px solid var(--border);border-radius:15px}
+.planner-form h3 {font:600 18px "Space Grotesk";margin:0 0 17px}
+label {display:block;font-size:10px;color:#c3cbe1;margin:13px 0 6px}
+input,select {
+  width:100%;padding:11px;background:#0b1225;border:1px solid #303a5b;
+  border-radius:8px;color:#edf0ff;outline:none;font-size:11px
+}
+input:focus,select:focus {border-color:var(--purple)}
+.full {width:100%;margin-top:18px}
+.form-note {font-size:9px;color:#7785a5;text-align:center}
+.plan-result {
+  margin-top:20px;padding:20px;background:#132a35;
+  border:1px solid #8ce8d555;border-radius:12px
+}
+.plan-result h3 {margin-top:0}
+.plan-result p,.plan-result li {font-size:12px;color:#c0d5dc}
+.assistant {display:grid;grid-template-columns:.8fr 1fr;gap:50px;align-items:center}
+.disclaimer {font-size:10px;color:#b4a9f5;border-left:2px solid var(--purple);padding-left:12px;margin-top:25px}
+.chat {
+  border:1px solid var(--border);border-radius:15px;overflow:hidden;
+  background:linear-gradient(145deg,#121b32,#0d1428)
+}
+.chat-head {padding:16px;border-bottom:1px solid var(--border);font-size:13px}
+.chat-head small {display:block;color:#9ba8c7;font-size:10px}
+.messages {
+  height:235px;overflow:auto;padding:16px;
+  display:flex;flex-direction:column;gap:12px
+}
+.message {max-width:95%;display:flex;gap:8px;align-items:flex-start}
+.message.user {align-self:flex-end;flex-direction:row-reverse}
+.avatar {
+  width:25px;height:25px;flex-shrink:0;display:grid;place-items:center;
+  border-radius:8px;background:#29264c;color:#c8c0ff;font-size:12px
+}
+.message.user .avatar {background:#17434b;color:#9bf1e6}
+.bubble {
+  background:#1a2440;border:1px solid #ffffff0a;padding:10px 12px;
+  border-radius:4px 12px 12px 12px;color:#c8d1e8;font-size:11px;line-height:1.8
+}
+.message.user .bubble {background:#233151;border-radius:12px 4px 12px 12px}
+.prompts {display:flex;gap:7px;flex-wrap:wrap;padding:0 14px 13px}
+.prompts button {
+  border:1px solid #62639455;background:#1b2140;border-radius:20px;
+  color:#c4c5ec;font-size:9px;padding:7px 9px
+}
+.chat-input {display:flex;gap:8px;padding:12px;border-top:1px solid var(--border)}
+.chat-input input {flex:1;min-width:0}
+.chat-input button {width:42px;border:0;border-radius:9px;background:linear-gradient(135deg,var(--purple),var(--cyan));font-size:20px}
+.quote {
+  text-align:center;padding:40px 15px;margin-top:80px;margin-bottom:55px;
+  border:1px solid var(--border);border-radius:14px;background:#171d39
+}
+.quote p {font:500 clamp(17px,2.5vw,24px) "Space Grotesk"}
+.quote small {font-size:10px;color:var(--muted)}
+footer {
+  padding:22px 0 32px;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:15px;
+  font-size:10px;color:var(--muted)
+}
+dialog {
+  width:min(440px,calc(100% - 30px));padding:28px;border:1px solid #8d8bd6;
+  border-radius:17px;background:#111a30;color:white
+}
+dialog::backdrop {background:#030612d9;backdrop-filter:blur(5px)}
+.dialog-close {float:right;background:none;border:0;color:white;font-size:25px}
+.dialog-symbol {font-size:60px;text-align:center;color:var(--purple)}
+.dialog-fact {border-left:2px solid var(--purple);padding:10px;background:#ffffff06;font-size:11px;margin:18px 0}
+@media(max-width:800px) {
+  .nav {gap:12px}
+  .hero {gap:10px}
+  .planner-layout,.assistant {gap:25px}
+  .explore-grid {grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:620px) {
+  .wrap,.topbar {width:calc(100% - 30px)}
+  .topbar {height:68px}
+  .menu {display:block}
+  .cta {display:none}
+  .nav {
+    display:none;position:absolute;top:65px;left:15px;right:15px;
+    z-index:5;background:#111a30;border:1px solid var(--border);
+    border-radius:12px;padding:10px;flex-direction:column;gap:0
+  }
+  .nav.open {display:flex}
+  .nav a {padding:10px}
+  .hero {grid-template-columns:1fr;padding-top:45px}
+  .hero h1 {font-size:43px}
+  .hero-art {height:280px;transform:scale(.85)}
+  .stats {grid-template-columns:1fr;gap:12px}
+  .stat {border-right:0;border-bottom:1px solid var(--border);padding:9px}
+  .stat:last-child {border:0}
+  .section {padding-top:65px}
+  .section-heading {align-items:flex-start;flex-direction:column}
+  .search {width:100%}
+  .grid {grid-template-columns:1fr}
+  .object-card {grid-template-columns:40% 60%}
+  .planner-layout,.assistant {grid-template-columns:1fr}
+  .planner-section {margin-top:65px;padding:45px 0}
+  .quote {margin-top:60px}
+  footer {flex-wrap:wrap}
+}
+</style>
+</head>
+
+<body>
+<div class="starfield"></div>
+
+<header class="topbar">
+  <a class="brand" href="#home"><span class="brand-mark">✦</span>Astro<span>Buddy</span></a>
+  <button class="menu" id="menuToggle" aria-label="Toggle navigation">☰</button>
+  <nav class="nav" id="navLinks">
+    <a href="#tonight">Tonight's sky</a>
+    <a href="#explore">Explore</a>
+    <a href="#planner">Planner</a>
+    <a href="#assistant">AI assistant</a>
+  </nav>
+  <a class="cta" href="#planner">Plan a session ↗</a>
+</header>
+
+<main id="home">
+<section class="hero wrap">
+  <div>
+    <div class="eyebrow">✦ YOUR PERSONAL UNIVERSE GUIDE</div>
+    <h1>The universe is<br><span class="gradient">closer than you think.</span></h1>
+    <p class="hero-description">Find something wonderful in the night sky. Discover celestial objects, plan your next stargazing session, and ask the cosmos anything.</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="#tonight">Explore tonight's sky →</a>
+      <a class="btn btn-quiet" href="#assistant">✧ Ask Astro AI</a>
+    </div>
+    <div class="hero-note">✧ Made for curious minds and backyard astronomers</div>
+  </div>
+  <div class="hero-art">
+    <div class="orbit"></div><div class="orbit two"></div>
+    <div class="planet"><div class="ring"></div></div>
+    <span class="art-moon">☾</span><span class="art-star">✦</span>
+    <div class="art-label label-one">✧ Somewhere out there</div>
+    <div class="art-label label-two">Keep looking up.</div>
+  </div>
+</section>
+
+<section class="wrap stats">
+  <div class="stat"><strong>8 planets</strong><small>One amazing solar system</small></div>
+  <div class="stat"><strong>Billions of stars</strong><small>In our Milky Way alone</small></div>
+  <div class="stat"><strong>Infinite curiosity</strong><small>Your journey starts here</small></div>
+</section>
+
+<section class="wrap section" id="tonight">
+  <div class="section-heading">
+    <div><div class="eyebrow">START EXPLORING</div><h2>Your cosmic <span>dashboard</span></h2></div>
+    <span class="date-pill" id="todayDate"></span>
+  </div>
+  <div class="grid">
+    <article class="card">
+      <div class="card-kicker">TONIGHT'S INSPIRATION</div>
+      <div class="moon-symbol">☾</div>
+      <h3>A little wonder goes a long way.</h3>
+      <p>Choose a clear, dark spot away from bright lights. Give your eyes time to adjust, then start with the Moon or a familiar constellation.</p>
+      <button class="text-btn" id="skyTipButton">Give me a sky tip →</button>
+      <p class="tip" id="skyTipOutput" aria-live="polite"></p>
+    </article>
+
+    <article class="card">
+      <div class="card-kicker">BEFORE YOU HEAD OUT</div>
+      <div class="moon-symbol">☁ ✦</div>
+      <h3>Make your own perfect night</h3>
+      <p>Cloud cover, light pollution, and the Moon's brightness can change what you see. Check a local forecast before observing.</p>
+      <p>☁ Check clouds · ◉ Find dark skies</p>
+      <small style="color:#7180a2">Live weather is not connected in this demo.</small>
+    </article>
+
+    <article class="card object-card">
+      <div class="object-art">🪐</div>
+      <div class="object-info">
+        <div class="card-kicker">PLANET GUIDE</div>
+        <h3>Meet Jupiter</h3>
+        <p>A giant world with cloud bands and a family of moons.</p>
+        <button class="text-btn" data-object="jupiter">Explore Jupiter →</button>
+      </div>
+    </article>
+
+    <article class="card object-card">
+      <div class="object-art">🌕</div>
+      <div class="object-info">
+        <div class="card-kicker">NATURAL SATELLITE</div>
+        <h3>Our Moon</h3>
+        <p>Look for craters, bright highlands, and shadowed edges.</p>
+        <button class="text-btn" data-object="moon">Explore the Moon →</button>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="wrap section" id="explore">
+  <div class="section-heading">
+    <div><div class="eyebrow">A WHOLE UNIVERSE TO DISCOVER</div><h2>Choose your next <span>destination</span></h2></div>
+    <input class="search" id="objectSearch" type="search" placeholder="Search the cosmos..." aria-label="Search celestial objects">
+  </div>
+  <div class="explore-grid" id="exploreGrid">
+    <button class="tile" data-object="saturn" data-search="saturn planet rings">
+      <div class="tile-art">🪐</div><small>PLANET</small><strong>Saturn</strong><em>Rings of wonder</em>
+    </button>
+    <button class="tile" data-object="mars" data-search="mars planet red">
+      <div class="tile-art">🔴</div><small>PLANET</small><strong>Mars</strong><em>The red planet</em>
+    </button>
+    <button class="tile" data-object="andromeda" data-search="andromeda galaxy space">
+      <div class="tile-art">🌌</div><small>GALAXY</small><strong>Andromeda</strong><em>A galaxy next door</em>
+    </button>
+    <button class="tile" data-object="nebula" data-search="nebula nebulae deep space">
+      <div class="tile-art">☁</div><small>DEEP SPACE</small><strong>Nebulae</strong><em>Stellar nurseries</em>
+    </button>
+  </div>
+  <p class="hidden" id="searchEmpty">No destinations found. Try Mars, Saturn, galaxy, or nebula.</p>
+</section>
+
+<section class="planner-section" id="planner">
+  <div class="wrap planner-layout">
+    <div class="planner-copy">
+      <div class="eyebrow">YOUR NEXT ADVENTURE</div>
+      <h2>Make a little room<br>for <span class="gradient">the extraordinary.</span></h2>
+      <p>Create a simple observation plan. Pick a date, choose your equipment, and tell AstroBuddy what you'd like to see.</p>
+      <p class="gradient">✧ One sky. Endless stories.</p>
+    </div>
+
+    <form class="planner-form" id="plannerForm">
+      <h3>✦ Observation planner</h3>
+      <label for="sessionDate">When are you going?</label>
+      <input type="date" id="sessionDate" required>
+
+      <label for="location">Your city or observing area</label>
+      <input type="text" id="location" placeholder="e.g. Patiala, India" maxlength="100" required>
+
+      <label for="equipment">What are you bringing?</label>
+      <select id="equipment">
+        <option>Naked eye</option><option>Binoculars</option>
+        <option>Telescope</option><option>Camera</option>
+      </select>
+
+      <label for="target">What would you love to see?</label>
+      <select id="target">
+        <option>The Moon and planets</option>
+        <option>Constellations</option>
+        <option>Meteor showers</option>
+        <option>Galaxies and nebulae</option>
+        <option>Anything beginner-friendly</option>
+      </select>
+
+      <button class="btn btn-primary full" type="submit">Create my plan →</button>
+      <p class="form-note">General advice only — no live sky prediction.</p>
+    </form>
+  </div>
+  <div class="wrap plan-result hidden" id="planResult" aria-live="polite"></div>
+</section>
+
+<section class="wrap section assistant" id="assistant">
+  <div class="intro">
+    <div class="eyebrow">CURIOSITY, MEET THE COSMOS</div>
+    <h2>Ask the universe<br><span class="gradient">anything.</span></h2>
+    <p>From black holes to the search for life beyond Earth, explore big questions one small answer at a time.</p>
+    <div class="disclaimer">✧ Demo assistant: answers are built-in examples. Connect an open-weight AI model for real AI responses.</div>
+  </div>
+
+  <div class="chat">
+    <div class="chat-head">✦ Astro AI <small>● Ready to explore</small></div>
+    <div class="messages" id="chatMessages" aria-live="polite">
+      <div class="message">
+        <span class="avatar">✦</span>
+        <div class="bubble">Hello, stargazer! 🌌 What would you like to discover about the universe today?</div>
+      </div>
+    </div>
+    <div class="prompts">
+      <button type="button" data-prompt="Why is Mars red?">Why is Mars red?</button>
+      <button type="button" data-prompt="What is a black hole?">What is a black hole?</button>
+      <button type="button" data-prompt="Can I see a galaxy with my eyes?">Can I see a galaxy?</button>
+    </div>
+    <form class="chat-input" id="chatForm">
+      <input id="chatInput" type="text" placeholder="Ask a cosmic question..." maxlength="400" required>
+      <button type="submit" aria-label="Send question">↑</button>
+    </form>
+  </div>
+</section>
+
+<section class="wrap quote">
+  <div class="gradient">✧</div>
+  <p>“Somewhere, something incredible is waiting to be known.”</p>
+  <small>— A reminder to stay curious</small>
+</section>
+</main>
+
+<footer class="wrap">
+  <a class="brand" href="#home">✦ Astro<span>Buddy</span></a>
+  <span>Built for curious minds. Keep looking up.</span>
+  <a href="#home">Back to top ↑</a>
+</footer>
+
+<dialog id="objectDialog">
+  <button class="dialog-close" id="dialogClose" aria-label="Close">×</button>
+  <div class="dialog-symbol" id="dialogSymbol">✦</div>
+  <div class="eyebrow" id="dialogType">COSMIC EXPLORER</div>
+  <h2 id="dialogTitle">Celestial object</h2>
+  <p id="dialogDescription"></p>
+  <div class="dialog-fact" id="dialogFact"></div>
+  <button class="btn btn-primary full" id="dialogPlanButton">Plan an observation →</button>
+</dialog>
+
+<script>
+const $ = selector => document.querySelector(selector);
+const $$ = selector => [...document.querySelectorAll(selector)];
+
+const objects = {
+  jupiter:{
+    name:"Jupiter",type:"PLANET GUIDE",symbol:"♃",
+    description:"Jupiter is the largest planet in our Solar System. Its swirling cloud bands and enormous storms make it a fascinating target for binoculars or a telescope.",
+    fact:"With suitable binoculars, Jupiter's four largest moons may appear as tiny points of light. Visibility depends on the date, location, and conditions."
+  },
+  moon:{
+    name:"Our Moon",type:"NATURAL SATELLITE",symbol:"☾",
+    description:"Earth's Moon is a brilliant first target for new sky-watchers. Its surface is covered with impact craters, mountains, and broad dark plains called maria.",
+    fact:"The boundary between lunar day and night often makes craters and mountains easier to see because their shadows add contrast."
+  },
+  saturn:{
+    name:"Saturn",type:"PLANET",symbol:"🪐",
+    description:"Saturn is a gas giant famous for its extensive ring system, made mostly of chunks of ice and rocky material. It also has a remarkable collection of moons.",
+    fact:"A telescope is usually needed to appreciate Saturn's rings. Check a current sky chart to find when the planet is above your horizon."
+  },
+  mars:{
+    name:"Mars",type:"PLANET",symbol:"🔴",
+    description:"Mars gets its reddish colour from iron minerals in its soil that have oxidized, similar to rust. It has enormous volcanoes, ancient valleys, and polar ice caps.",
+    fact:"Mars changes in apparent brightness as Earth and Mars move around the Sun. It is easiest to observe around favourable oppositions."
+  },
+  andromeda:{
+    name:"Andromeda Galaxy",type:"GALAXY",symbol:"🌌",
+    description:"The Andromeda Galaxy is a large spiral galaxy beyond our Milky Way. It contains an enormous number of stars and is one of the most distant objects many people can see without optical aid.",
+    fact:"Under a dark, clear sky, experienced observers may spot Andromeda as a faint fuzzy patch. Binoculars can make finding it easier."
+  },
+  nebula:{
+    name:"Nebulae",type:"DEEP SPACE",symbol:"☁",
+    description:"Nebulae are enormous clouds of gas and dust. Some are places where stars form; others are material released by dying stars.",
+    fact:"Many nebulae look faint to the eye. A dark sky and suitable optics help, and long-exposure astrophotography reveals details our eyes may not see."
+  }
+};
+
+function showObject(key) {
+  const info = objects[key];
+  if (!info) return;
+  $("#dialogSymbol").textContent = info.symbol;
+  $("#dialogType").textContent = info.type;
+  $("#dialogTitle").textContent = info.name;
+  $("#dialogDescription").textContent = info.description;
+  $("#dialogFact").textContent = info.fact;
+  $("#objectDialog").showModal();
+}
+
+$$("[data-object]").forEach(button => {
+  button.addEventListener("click", () => showObject(button.dataset.object));
+});
+
+$("#dialogClose").addEventListener("click", () => $("#objectDialog").close());
+
+$("#objectDialog").addEventListener("click", event => {
+  if (event.target === $("#objectDialog")) $("#objectDialog").close();
+});
+
+$("#dialogPlanButton").addEventListener("click", () => {
+  $("#objectDialog").close();
+  $("#planner").scrollIntoView({behavior:"smooth"});
+});
+
+$("#todayDate").textContent = new Intl.DateTimeFormat(undefined,{
+  weekday:"short",month:"short",day:"numeric",year:"numeric"
+}).format(new Date());
+
+const dateInput = $("#sessionDate");
+const now = new Date();
+dateInput.min = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+dateInput.value = dateInput.min;
+
+const tips = [
+  "Let your eyes adapt to darkness for about 20–30 minutes. Avoid bright phone screens, or use a dim red-light setting.",
+  "Start with the Moon, then try to trace a bright constellation from a star chart.",
+  "Bring a warm layer, water, and a comfortable seat. A patient observer often sees more.",
+  "Move away from streetlights if it is safe to do so. Darker skies make faint stars easier to spot.",
+  "Use a star map to confirm what you are seeing. Planets usually shine steadily while stars often twinkle more."
+];
+
+$("#skyTipButton").addEventListener("click", () => {
+  $("#skyTipOutput").textContent = tips[Math.floor(Math.random()*tips.length)];
+});
+
+$("#objectSearch").addEventListener("input", event => {
+  const query = event.target.value.trim().toLowerCase();
+  let count = 0;
+  $$(".tile").forEach(tile => {
+    const searchable = `${tile.dataset.search} ${tile.innerText}`.toLowerCase();
+    const matches = searchable.includes(query);
+    tile.classList.toggle("hidden",!matches);
+    if (matches) count++;
+  });
+  $("#searchEmpty").classList.toggle("hidden",count !== 0);
+});
+
+const targetTips = {
+  "The Moon and planets":[
+    "Start with the Moon if it is above the horizon; binoculars can reveal lunar detail.",
+    "Check a current sky chart for visible planets and their rise and set times."
+  ],
+  "Constellations":[
+    "Begin with the brightest stars and use a star chart to trace constellation patterns.",
+    "Try to observe from a safe spot with a wide view of the sky."
+  ],
+  "Meteor showers":[
+    "Look up the shower's peak date and radiant before leaving; activity varies by year.",
+    "Use your unaided eyes and allow time for your eyes to adapt."
+  ],
+  "Galaxies and nebulae":[
+    "Choose the darkest safe location available and avoid nights with a bright Moon if possible.",
+    "Bring binoculars or a telescope and use a current finder chart for your target."
+  ],
+  "Anything beginner-friendly":[
+    "Start with the Moon, bright planets, and easily recognized star patterns.",
+    "Bring a red-light torch, warm clothes, water, and a star chart."
+  ]
+};
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g,char => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[char]);
+}
+
+$("#plannerForm").addEventListener("submit",event => {
+  event.preventDefault();
+
+  const date = new Date(`${dateInput.value}T12:00:00`);
+  const dateLabel = date.toLocaleDateString(undefined,{
+    weekday:"long",month:"long",day:"numeric",year:"numeric"
+  });
+  const location = $("#location").value.trim();
+  const equipment = $("#equipment").value;
+  const target = $("#target").value;
+  const tips = targetTips[target];
+
+  $("#planResult").innerHTML = `
+    <h3>✦ Your stargazing plan</h3>
+    <p><strong>${escapeHTML(dateLabel)}</strong> · ${escapeHTML(location)}</p>
+    <p>Goal: ${escapeHTML(target)} · Equipment: ${escapeHTML(equipment)}</p>
+    <ul>
+      ${tips.map(tip=>`<li>${escapeHTML(tip)}</li>`).join("")}
+      <li>Check local cloud cover on the day and observe from a safe location.</li>
+    </ul>
+    <p><em>This is a general plan. It does not calculate real-time celestial positions or weather.</em></p>
+  `;
+  $("#planResult").classList.remove("hidden");
+  $("#planResult").scrollIntoView({behavior:"smooth",block:"nearest"});
+});
+
+const answers = [
+  {
+    terms:["mars","red"],
+    answer:"Mars looks red because its surface contains iron-rich minerals that have oxidized, much like rust. Fine rusty dust covers much of the planet and gives it that distinctive colour. 🔴"
+  },
+  {
+    terms:["black hole"],
+    answer:"A black hole is a region where gravity is so strong that nothing, not even light, can escape once it crosses the event horizon. Scientists study them by observing how they affect nearby stars, gas, and light."
+  },
+  {
+    terms:["galaxy","eyes","naked"],
+    answer:"Under a very dark sky, the Andromeda Galaxy can appear as a faint, fuzzy patch to the unaided eye. Light pollution and sky conditions make a big difference. Binoculars can help you find it."
+  },
+  {
+    terms:["moon"],
+    answer:"The Moon is a great first target. Try looking near the boundary between its illuminated and dark sides: shadows there can make craters and mountains stand out."
+  },
+  {
+    terms:["saturn","rings"],
+    answer:"Saturn's rings are made mostly of countless pieces of ice and rocky material. They are huge but very thin compared with their width. A telescope is generally needed to see the rings clearly."
+  },
+  {
+    terms:["life","aliens"],
+    answer:"Scientists have not confirmed life beyond Earth yet. Researchers study Mars, icy moons such as Europa and Enceladus, and planets orbiting other stars for clues about potentially habitable environments."
+  },
+  {
+    terms:["star","sun"],
+    answer:"Stars are huge spheres of hot plasma held together by gravity. Deep in their cores, nuclear fusion releases energy. Our Sun is the closest star to Earth."
+  },
+  {
+    terms:["light year"],
+    answer:"A light-year is a distance, not a unit of time. It is how far light travels in one year, about 9.46 trillion kilometres."
+  },
+  {
+    terms:["meteor","shooting star"],
+    answer:"A shooting star is usually a small piece of space debris heating the air as it enters Earth's atmosphere. For meteor showers, find a dark, safe spot and give yourself time to watch."
+  },
+  {
+    terms:["planet"],
+    answer:"Our Solar System has eight recognized planets. To identify which ones are visible tonight, you need a current sky chart for your date and location; this demo does not fetch live sky data."
+  }
+];
+
+function getAnswer(question) {
+  const normalized = question.toLowerCase();
+  const match = answers.find(item => item.terms.some(term => normalized.includes(term)));
+  return match ? match.answer :
+    "Great question! This demo has a small set of built-in astronomy answers. To answer a wider range of questions, connect AstroBuddy to an open-weight language model and reliable astronomy sources. 🌠";
+}
+
+function addMessage(text,who) {
+  const row = document.createElement("div");
+  row.className = `message ${who === "user" ? "user" : ""}`;
+
+  const avatar = document.createElement("span");
+  avatar.className = "avatar";
+  avatar.textContent = who === "user" ? "◉" : "✦";
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.textContent = text;
+
+  row.append(avatar,bubble);
+  $("#chatMessages").appendChild(row);
+  $("#chatMessages").scrollTop = $("#chatMessages").scrollHeight;
+}
+
+function askQuestion(question) {
+  const clean = question.trim();
+  if (!clean) return;
+  addMessage(clean,"user");
+  setTimeout(() => addMessage(getAnswer(clean),"bot"),250);
+}
+
+$("#chatForm").addEventListener("submit",event => {
+  event.preventDefault();
+  const input = $("#chatInput");
+  askQuestion(input.value);
+  input.value = "";
+});
+
+$$("[data-prompt]").forEach(button => {
+  button.addEventListener("click",() => askQuestion(button.dataset.prompt));
+});
+
+$("#menuToggle").addEventListener("click",() => {
+  $("#navLinks").classList.toggle("open");
+});
+
+$$(".nav a").forEach(link => {
+  link.addEventListener("click",() => $("#navLinks").classList.remove("open"));
+});
+</script>
+</body>
+</html>
